@@ -280,11 +280,20 @@ export function LeftNav() {
   const [quotesLoading, setQuotesLoading] = useState(false);
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // All tickers we want prices for
+  // Only fetch prices for tickers that are actually on screen — i.e. inside an
+  // EXPANDED watchlist/sleeve, plus the sectors when that group is open.
+  // Requesting every ticker across all watchlists (hundreds) blew past the
+  // backend's 150-per-request cap, so anything past the first 150 came back
+  // blank ("—") forever. Scoping to visible rows keeps each request small and
+  // the API client chunks at 150 as a safety net (see sleeves-api.getQuotes).
   const allTickers = [
-    ...watchlists.flatMap((wl) => wl.tickers.map((e) => e.ticker)),
-    ...(config?.sleeves.flatMap((s) => s.tickers) ?? []),
-    ...SECTOR_ETFS.map((s) => s.ticker),
+    ...watchlists
+      .filter((wl) => expandedWatchlists.has(wl.name))
+      .flatMap((wl) => wl.tickers.map((e) => e.ticker)),
+    ...(config?.sleeves
+      .filter((s) => expandedSleeves.has(s.name))
+      .flatMap((s) => s.tickers) ?? []),
+    ...(sectorsOpen ? SECTOR_ETFS.map((s) => s.ticker) : []),
   ];
   const uniqueTickers = [...new Set(allTickers)];
 
@@ -336,7 +345,7 @@ export function LeftNav() {
   return (
     <div className="flex flex-col h-full bg-background border-r border-border select-none">
       {/* App header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+      <div data-tour="app-logo" className="flex items-center gap-2 px-4 py-3 border-b border-border">
         <div className="w-6 h-6 rounded bg-primary/20 flex items-center justify-center flex-shrink-0">
           <LineChart className="h-3.5 w-3.5 text-primary" />
         </div>
@@ -354,6 +363,7 @@ export function LeftNav() {
         <button
           type="button"
           onClick={toggleChat}
+          data-tour="ai-assistant"
           className={cn(
             'transition-colors',
             chatOpen ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
@@ -368,7 +378,7 @@ export function LeftNav() {
           one row in a 240px rail ("Screening" alone needs ~46px at 10px
           type), and a bottom-border tab metaphor reads poorly on two rows,
           so the active state is a filled pill instead. */}
-      <div className="grid grid-cols-3 gap-1 p-2 border-b border-border">
+      <div data-tour="nav-sections" className="grid grid-cols-3 gap-1 p-2 border-b border-border">
         {navItems.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -390,7 +400,7 @@ export function LeftNav() {
       {/* Scrollable list area */}
       <div className="flex-1 overflow-y-auto">
         {/* ── Watchlists ── */}
-        <div className="pt-2">
+        <div data-tour="watchlists" className="pt-2">
           <div className="flex items-center">
             <div className="flex-1">
               <SectionHeader

@@ -4,6 +4,61 @@ All notable changes to Alpha Terminal are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] — 2026-06-29
+
+### Fixed
+- **Provider API keys are trimmed before use.** A stray leading/trailing space in
+  an env var (easy to introduce when pasting a secret into a hosting dashboard)
+  was sent verbatim and 401'd, silently hiding data — e.g. the Market tab's whole
+  "Financials & analyst data" (Finnhub) card vanishing. `key_context` now strips
+  Massive/Finnhub/FDS keys at the single point every client reads through. +1 test.
+  - Note: this is defense-in-depth; the card disappears entirely when the key is
+    simply *unset* in the environment — set `FINNHUB_API_KEY` in the deploy env.
+
+## [1.7.0] — 2026-06-29
+
+### Added
+- **Onboarding flag is now per-account (server-side).** The first-login
+  walkthrough's "seen" state moved from browser localStorage to a per-user
+  `user_settings.onboarding_completed` column, so it shows exactly once per
+  account — surviving a browser/localStorage clear or a new device. `GET /auth/me`
+  now returns `onboarding_completed`; `POST /auth/onboarding-complete` records it.
+  localStorage is kept as a fast-path cache and offline fallback.
+  - New: Alembic migration `d4e5f6a7b8c9_add_onboarding_completed`,
+    `user_settings_service.py` (dual file/DB backend), `auth-api.ts` (frontend).
+  - Threaded through both storage backends + provisioning seed; `+2` cutover tests.
+
+### Fixed
+- **Sidebar prices/sparklines now populate for every visible ticker.** The left
+  rail requested quotes for *all* tickers across every watchlist (hundreds) in one
+  call, blowing past the backend's 150-per-request cap so anything past the first
+  150 stayed blank. Now it fetches only the tickers in expanded groups, and the
+  API client chunks requests at 150 as a safety net.
+
+### Changed
+- Onboarding walkthrough slide 4 (Pattern Scanner) now shows a real scan with
+  detected patterns instead of the empty form (capture script runs a small scan).
+
+## [1.6.9] — 2026-06-29
+
+### Added
+- **First-login onboarding walkthrough.** New users see a one-time welcome popup
+  on first login: an 8-slide carousel (overview, Market, Pattern Scanner,
+  Options/Backtest, AI assistant, Portfolio/P&L, and API-key setup) with real
+  screenshots, plus an optional interactive `driver.js` tour that spotlights the
+  live nav. Skippable on every step; auto-shows only once (per-user localStorage
+  flag `alpha-onboarding-v1:<userId>`); replayable anytime via a Help ("?")
+  button in the top-right account controls.
+  - New: `app/frontend/src/components/onboarding/` (`welcome-dialog.tsx`,
+    `use-onboarding.tsx`, `onboarding-steps.tsx`); screenshots in
+    `app/frontend/public/onboarding/`.
+  - `data-tour` attributes added to `left-nav.tsx` / `user-menu.tsx` for the tour.
+  - New dep: `driver.js`. Dormant when `VITE_AUTH_ENABLED` is off.
+- **Screenshot re-capture pipeline.** `npm run capture:onboarding`
+  (`scripts/capture-onboarding.mjs`, puppeteer-core) regenerates the walkthrough
+  images headlessly against an auth-off dev server. `.gitignore` now un-ignores
+  `app/frontend/public/onboarding/*.png` (global `*.png` rule).
+
 ## [1.6.8] — 2026-06-29
 
 ### Fixed

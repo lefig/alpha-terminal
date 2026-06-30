@@ -2,8 +2,8 @@
 # upstream value so existing virtualenvs continue to resolve; the public
 # brand is "Alpha Terminal" (see README.md, LICENSE).
 [tool.poetry]
-name = "alpha-terminal"
-version = "1.6.8"
+name = "ai-hedge-fund"
+version = "1.7.1"
 description = "Alpha Terminal — retail-investor research terminal. AI agent panels score your book, a realistic options backtester checks your strategies, and a market-news + earnings-call desk keeps you current."
 authors = ["Ronit Ganguly <ganguly.ronit@gmail.com>"]
 readme = "README.md"
