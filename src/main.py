@@ -5,8 +5,8 @@ from langchain_core.messages import HumanMessage
 from langgraph.graph import END, StateGraph
 from colorama import Fore, Style, init
 import questionary
-from src.agents.portfolio_manager import portfolio_management_agent
-from src.agents.risk_manager import risk_management_agent
+from src.agents.portfolio_manager import portfolio_manager_agent
+from src.agents.risk_manager import risk_manager_agent
 from src.graph.state import AgentState
 from src.utils.display import print_trading_output
 from src.utils.analysts import ANALYST_ORDER, get_analyst_nodes
@@ -115,8 +115,8 @@ def create_workflow(selected_analysts=None):
         workflow.add_edge("start_node", node_name)
 
     # Always add risk and portfolio management
-    workflow.add_node("risk_management_agent", risk_management_agent)
-    workflow.add_node("portfolio_manager", portfolio_management_agent)
+    workflow.add_node("risk_management_agent", risk_manager_agent)
+    workflow.add_node("portfolio_manager", portfolio_manager_agent)
 
     # Connect selected analysts to risk management
     for analyst_key in selected_analysts:
