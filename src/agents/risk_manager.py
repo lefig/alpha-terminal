@@ -8,7 +8,7 @@ import pandas as pd
 from src.utils.api_key import get_api_key_from_state
 
 ##### Risk Management Agent #####
-def risk_management_agent(state: AgentState, agent_id: str = "risk_management_agent"):
+def risk_manager_agent(state: AgentState, agent_id: str = "risk_management_agent"):
     """Controls position sizing based on volatility-adjusted risk factors for multiple tickers."""
     portfolio = state["data"]["portfolio"]
     data = state["data"]

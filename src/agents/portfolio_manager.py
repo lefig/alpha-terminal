@@ -22,7 +22,7 @@ class PortfolioManagerOutput(BaseModel):
 
 
 ##### Portfolio Management Agent #####
-def portfolio_management_agent(state: AgentState, agent_id: str = "portfolio_manager"):
+def portfolio_manager_agent(state: AgentState, agent_id: str = "portfolio_manager"):
     """Makes final trading decisions and generates orders for multiple tickers"""
 
     portfolio = state["data"]["portfolio"]

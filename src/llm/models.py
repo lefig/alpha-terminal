@@ -147,15 +147,31 @@ def get_model(model_name: str, model_provider: ModelProvider, api_keys: dict = N
             print(f"API Key Error: Please make sure GROQ_API_KEY is set in your .env file or provided via API keys.")
             raise ValueError("Groq API key not found.  Please make sure GROQ_API_KEY is set in your .env file or provided via API keys.")
         return ChatGroq(model=model_name, api_key=api_key)
-    elif model_provider == ModelProvider.OPENAI:
+    elif model_provider == ModelProvider.OPENAI: #FIGGEST
         # Get and validate API key
         api_key = (api_keys or {}).get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
-        base_url = os.getenv("OPENAI_API_BASE")
+        base_url = os.getenv("OPENAI_BASE_URL")
+        model_name = os.getenv("NVIDIA_MODEL") if base_url else model_name
+        
         if not api_key:
             # Print error to console
             print(f"API Key Error: Please make sure OPENAI_API_KEY is set in your .env file or provided via API keys.")
             raise ValueError("OpenAI API key not found.  Please make sure OPENAI_API_KEY is set in your .env file or provided via API keys.")
-        return ChatOpenAI(model=model_name, api_key=api_key, base_url=base_url)
+        
+        # Initialize an empty dictionary for extra LangChain arguments
+        llm_kwargs = {}
+        
+        # If a custom base_url is present (e.g., pointing to NVIDIA), disable Responses API
+        if base_url:
+            llm_kwargs["use_responses_api"] = False
+            
+        # Unpack the kwargs into ChatOpenAI
+        return ChatOpenAI(
+            model=model_name, 
+            api_key=api_key, 
+            base_url=base_url, 
+            **llm_kwargs
+        )
     elif model_provider == ModelProvider.ANTHROPIC:
         api_key = (api_keys or {}).get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
         if not api_key:

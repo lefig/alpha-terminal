@@ -5,8 +5,8 @@ from langchain_core.messages import HumanMessage
 from langgraph.graph import END, StateGraph
 
 from app.backend.services.agent_service import create_agent_function
-from src.agents.portfolio_manager import portfolio_management_agent
-from src.agents.risk_manager import risk_management_agent
+from src.agents.portfolio_manager import portfolio_manager_agent
+from src.agents.risk_manager import risk_manager_agent
 from src.main import start
 from src.utils.analysts import ANALYST_CONFIG
 from src.graph.state import AgentState
@@ -68,7 +68,7 @@ def create_graph(graph_nodes: list, graph_edges: list) -> StateGraph:
     # Add portfolio manager nodes and their corresponding risk managers
     risk_manager_nodes = {}  # Map portfolio manager ID to risk manager ID
     for portfolio_manager_id in portfolio_manager_nodes:
-        portfolio_manager_function = create_agent_function(portfolio_management_agent, portfolio_manager_id)
+        portfolio_manager_function = create_agent_function(portfolio_manager_agent, portfolio_manager_id)
         graph.add_node(portfolio_manager_id, portfolio_manager_function)
         
         # Create unique risk manager for this portfolio manager
@@ -77,7 +77,7 @@ def create_graph(graph_nodes: list, graph_edges: list) -> StateGraph:
         risk_manager_nodes[portfolio_manager_id] = risk_manager_id
         
         # Add the risk manager node
-        risk_manager_function = create_agent_function(risk_management_agent, risk_manager_id)
+        risk_manager_function = create_agent_function(risk_manager_agent, risk_manager_id)
         graph.add_node(risk_manager_id, risk_manager_function)
 
     # Build connections based on React Flow graph structure
